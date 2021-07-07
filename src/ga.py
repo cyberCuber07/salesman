@@ -102,7 +102,6 @@ class GA:
             idx_1 = best_result[i]
             idx_2 = best_result[i + 1]
             route.append([self.cities[idx_1], self.cities[idx_2]])
-        ic(route)
         return np.array(route)
 
     def show_results(self, history):

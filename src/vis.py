@@ -28,18 +28,21 @@ def vis(data,
     x_max, y_max = np.max(data[:, 0]), np.max(data[:, 1])
     _size = [int(x_max + dx), int(y_max + dx), 3]
     canvas = np.zeros(tuple(_size))
+    shift = [0, _size[1]]
 
     for idx, one in enumerate(data):
-        ic(one)
-        shift = [0, _size[1]]
         start_point = tuple([int(shift[0] + one[0]), int(shift[1] - one[1])])
         color = (255, 255, 255)
         canvas = cv2.circle(canvas, start_point, radius, color, thickness)
 
     cons = cons.astype('int')
+    cons = cons.reshape((cons.shape[0], 4))
     for idx, con in enumerate(cons):
-        start_point = tuple(con[0])
-        end_point = tuple(con[1])
+        for i in range(2):
+            tmp_idx = 2 * i + 1
+            con[tmp_idx] = int(shift[1] - con[tmp_idx])
+        start_point = tuple(con[:2])
+        end_point = tuple(con[2:])
         color = (idx % 3 * 255 / 6, (idx + 1) % 3 * 255 / 6, (idx + 2) % 3 * 255 / 6)
         canvas = cv2.arrowedLine(canvas, start_point, end_point, color, 1)
         text = str(idx)
