@@ -2,11 +2,7 @@ import numpy as np
 from icecream import ic
 import os
 import csv
-
-
-N = 20
-X_min, Y_min = 0, 0
-X_max, Y_max = 400, 400
+from parms import N, X_min, X_max, Y_min, Y_max
 
 
 def one_set(n):

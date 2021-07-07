@@ -3,9 +3,8 @@ import cv2
 import csv
 from icecream import ic
 import sys
+from parms import N
 
-
-N = 100
 
 
 def get_data(file_path):
@@ -20,26 +19,34 @@ def get_data(file_path):
 def vis(data,
         cons=np.array([]),
         dx=3,
-        scale=2,
+        scale=1.7,
         radius=2,
-        thickness=-1):
+        thickness=-1,
+        font=cv2.FONT_HERSHEY_SIMPLEX,
+        fontScale=0.5,
+        fontThickness=1):
     x_max, y_max = np.max(data[:, 0]), np.max(data[:, 1])
     _size = [int(x_max + dx), int(y_max + dx), 3]
     canvas = np.zeros(tuple(_size))
 
     for idx, one in enumerate(data):
+        ic(one)
         shift = [0, _size[1]]
         start_point = tuple([int(shift[0] + one[0]), int(shift[1] - one[1])])
         color = (255, 255, 255)
         canvas = cv2.circle(canvas, start_point, radius, color, thickness)
 
+    cons = cons.astype('int')
     for idx, con in enumerate(cons):
-        start_point = con[:2]
-        end_point = con[2:]
+        start_point = tuple(con[0])
+        end_point = tuple(con[1])
         color = (idx % 3 * 255 / 6, (idx + 1) % 3 * 255 / 6, (idx + 2) % 3 * 255 / 6)
-        canvas = cv2.arroweLine(canvas, start_point, end_point, color, -1)
+        canvas = cv2.arrowedLine(canvas, start_point, end_point, color, 1)
+        text = str(idx)
+        center = tuple([int((i + j) / 2) for (i, j) in zip(start_point, end_point)])
+        canvas = cv2.putText(canvas, text, center, font, fontScale, color, fontThickness, cv2.LINE_AA)
 
-    _size = np.array([i * scale for i in _size])[:2]
+    _size = np.array([int(i * scale) for i in _size])[:2]
     canvas = cv2.resize(canvas, tuple(_size))
     cv2.imshow(".", canvas)
     cv2.waitKey(0)
