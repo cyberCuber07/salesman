@@ -12,10 +12,9 @@ class GA:
         self.n_sets = N_SETS
         self.n_parents = N_PARENTS
         self.n_crossover = N_CROSSOVER
-        self.crossover_point = CROSSOVER_POINT
         self.n_mutations = N_MUTATIONS
         self.iter = ITER
-        self.mute_per = MUTE_PER
+        self.random_factor = RANDOM_FACTOR
         self.curr_pos = self.init_pos()
 
     def init_pos(self):
@@ -42,9 +41,22 @@ class GA:
         return np.array(q)
 
     def get_parents(self, fitness):
+        """
+        for small data random_factor := 0 is ok --- that is NO random data --- only best ones
+        assumption:
+            the bigger the data the more important the random_factor gets
+        """
+        n_r = int(self.n_parents * self.random_factor)
         idx_sort_arr = np.argsort(fitness)
-        idx_sort_arr = idx_sort_arr[0 : self.n_parents]
-        return np.array([self.curr_pos[i] for i in idx_sort_arr])
+        # get best
+        idx_sort_arr = idx_sort_arr[0 : self.n_parents - n_r]
+        arr = np.array([self.curr_pos[i] for i in idx_sort_arr])
+        r_idx = np.random.randint(low=self.n_parents + 1, high=self.n_parents + n_r + 1, size=(n_r, 1))
+        # get random
+        for i in range(n_r):
+            idx = r_idx[i]
+            arr = np.append(arr, self.curr_pos[idx], axis=0)
+        return arr
 
     def get_val(self, arr, n):
         cross_idx_1 = np.random.randint(0, n)
@@ -70,21 +82,21 @@ class GA:
 
     def mute_switch(self, cities):
         for _ in range(self.n_mutations):
-            idx_1 = np.random.randint(0, self.n - 1)
-            idx_2 = np.random.randint(0, self.n - 1)
+            idx_1 = np.random.randint(0, self.n)
+            idx_2 = np.random.randint(0, self.n)
             tmp = cities[idx_1]
             cities[idx_1] = cities[idx_2]
             cities[idx_2] = tmp
         return cities
 
     def mute_shift(self, cities):
-        roll_dir = np.random.randint(0, self.n)
+        roll_dir = np.random.randint(0, 2 * self.n)
         cities = np.roll(cities, roll_dir)
         return cities
 
     def run(self):
         history = []
-        for _ in range(self.iter):
+        for iter in range(self.iter):
             fitness = self.fitness(self.curr_pos)
             parents = self.get_parents(fitness)
             mutation_offspring = self.mutation(parents)
@@ -94,8 +106,8 @@ class GA:
             # save best ones
             history.append(fitness[0])
             best_result = parents[0]
-            ic(fitness[0])
-        # self.show_results(history)
+            print('\033[92m' + "iter: {}, |       fitness: {:.2f}".format(iter, fitness[0]))
+        self.show_results(history)
         best_result = np.append(best_result, best_result[0])
         route = []
         for i in range(best_result.shape[0] - 1):

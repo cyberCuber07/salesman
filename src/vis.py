@@ -19,7 +19,7 @@ def get_data(file_path):
 def vis(data,
         cons=np.array([]),
         dx=3,
-        scale=1.7,
+        scale=0.6,
         radius=2,
         thickness=-1,
         font=cv2.FONT_HERSHEY_SIMPLEX,
